@@ -29,6 +29,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
 import javax.swing.filechooser.FileFilter;
 
 /**
@@ -175,19 +176,29 @@ public class Functions {
         
     }
     
-    public static String fileBits(File file){
+    public static List<Character> fileBits(File file, JProgressBar progress){
+        progress.setVisible(true);
+        
         try {
             byte[] fBytes=Files.readAllBytes(file.toPath());
-            String bits="";
+            progress.setMaximum(fBytes.length);
+            progress.setValue(0);
+            List<Character> bits=new ArrayList();
             for(byte tmp:fBytes){
-                bits+=Functions.byteToBinary(tmp);
+                String t=Functions.byteToBinary(tmp);
+                for(int c=0;c<t.length();c++){
+                    bits.add(t.charAt(c));
+                }
+                progress.setValue(progress.getValue()+1);
             }
+            progress.setVisible(false);
             return bits;
             //Functions.tesBuild(bits);
         } catch (IOException ex) {
             Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return "";
+        progress.setVisible(false);
+        return new ArrayList();
     }
     
     public static File getSecret(String bits, String ext){
@@ -201,6 +212,50 @@ public class Functions {
                 tmp=""+bits.charAt(i);
             }else{
                 tmp+=bits.charAt(i);
+            }
+        }
+        bytes.add(tmp);
+        
+        byte realBytes[]=new byte[bytes.size()];
+        for(int i=0;i<bytes.size();i++){
+            realBytes[i]=Functions.binToByte(bytes.get(i));
+        }
+        String resDir=System.getProperty("user.dir")+"/steganography/";
+        String res=resDir+"result."+ext;
+        System.out.println(res);
+        if(!Files.exists(Paths.get(resDir))){
+            try {
+                Files.createDirectories(Paths.get(resDir));
+            } catch (IOException ex) {
+                Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        if(Files.exists(Paths.get(resDir))){
+            try {
+                OutputStream os = new FileOutputStream(new File(res));
+                os.write(realBytes);
+                os.close();
+                ret=new File(res);
+            } catch (FileNotFoundException ex) {
+                System.out.println(ex.getMessage());
+            } catch (IOException ex) {
+                Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return ret;
+    }
+    
+    public static File getSecret(List<Character> bits, String ext){
+        if(bits.equals(""))return null;
+        File ret=null;
+        List<String> bytes=new ArrayList();
+        String tmp="";
+        for(int i=0;i<bits.size();i++){
+            if(i%8==0){
+                if(!tmp.equals(""))bytes.add(tmp);
+                tmp=""+bits.get(i);
+            }else{
+                tmp+=bits.get(i);
             }
         }
         bytes.add(tmp);

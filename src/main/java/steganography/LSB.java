@@ -10,7 +10,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
 
 /**
  *
@@ -25,30 +27,38 @@ public class LSB {
     private String ext;
     private final int headerWalker=32+40+64+40;
     private int channelPerPixel;
+    private FormEncrypt frmEnc;
+    private FormDecrypt frmDec;
     
-    public static LSB create(BufferedImage coverImg, File secretImg, String pass, int channelPerPixel){
-        return  new LSB(coverImg, secretImg, pass, channelPerPixel);
+    public static LSB create(BufferedImage coverImg, File secretImg, String pass, int channelPerPixel,FormEncrypt frmEncrypt,FormDecrypt frmDecrypt){
+        return  new LSB(coverImg, secretImg, pass, channelPerPixel,frmEncrypt,frmDecrypt);
     }
     
-    public static LSB create(BufferedImage img, String pass, int channelPerPixel){
-        return  new LSB(img, null, pass, channelPerPixel);
+    public static LSB create(BufferedImage img, String pass, int channelPerPixel,FormEncrypt frmEncrypt,FormDecrypt frmDecrypt){
+        return  new LSB(img, null, pass, channelPerPixel,frmEncrypt,frmDecrypt);
     }
     
-    public static LSB create(BufferedImage coverImg, File secretImg, String pass){
-        return  new LSB(coverImg, secretImg, pass, 1);
+    public static LSB create(BufferedImage coverImg, File secretImg, String pass,FormEncrypt frmEncrypt,FormDecrypt frmDecrypt){
+        return  new LSB(coverImg, secretImg, pass, 1,frmEncrypt,frmDecrypt);
     }
     
-    public static LSB create(BufferedImage img, String pass){
-        return  new LSB(img, null, pass, 1);
+    public static LSB create(BufferedImage img, String pass,FormEncrypt frmEncrypt,FormDecrypt frmDecrypt){
+        return  new LSB(img, null, pass, 1,frmEncrypt,frmDecrypt);
     }
     
-    public LSB(BufferedImage coverImg, File secretImg, String pass, int channelPerPixel){
+    public LSB(BufferedImage coverImg, File secretImg, String pass, int channelPerPixel,FormEncrypt frmEncrypt,FormDecrypt frmDecrypt){
         if(channelPerPixel>3 ||channelPerPixel<1)this.channelPerPixel=1;
         if(secretImg!=null)this.ext=Functions.getFileExt(secretImg);
         this.channelPerPixel=channelPerPixel;
         this.coverImg=coverImg;
         this.secretImg=secretImg;
         this.pass=pass;
+        this.frmEnc=frmEncrypt;
+        this.frmDec=frmDecrypt;
+    }
+    
+    public void setProgress(long value){
+        
     }
     
     public BufferedImage encrypt(){
@@ -64,52 +74,56 @@ public class LSB {
         
         if(this.secretImg.length()*8>maxSize){
             JOptionPane.showMessageDialog(null,"Lebe Gan. Maks:"+maxSize/8+" Bytes");
+            this.frmEnc.setLocked(false);
             return null;
         }
         this.walker=this.secretImg.length()*8;
-        String allBits=this.getKeyBinary()+this.getPassBinary()+this.getWalkerBinary()+this.getExtBinary()+Functions.fileBits(this.secretImg);
+        this.frmEnc.getMsgLabel().setText("Reading secret image...");
+        List<Character> allBits=this.join(this.getKeyBinary(),this.getPassBinary(),this.getWalkerBinary(),this.getExtBinary(),Functions.fileBits(this.secretImg,this.frmEnc.getProgress()));
+        //String allBits=this.getKeyBinary()+this.getPassBinary()+this.getWalkerBinary()+this.getExtBinary()+Functions.fileBits(this.secretImg,this.frmEnc.getProgress());
+        
         System.out.println("E-walker: "+this.getWalkerBinary()+"    "+this.walker);
         int allBitsWalker=0;
+        
+        this.frmEnc.getProgress().setMaximum(allBits.size());
+        this.frmEnc.getProgress().setValue(0);
+        this.frmEnc.getProgress().setVisible(true);
+        this.frmEnc.getMsgLabel().setText("Encrypting...");
         for(int c=0;c<this.channelPerPixel;c++){
             for(int j=0;j<h;j++){
                 for(int i=0;i<w;i++){
-                    if(allBitsWalker==allBits.length())break;
+                    if(allBitsWalker==allBits.size())break;
                     int pixel=ret.getRGB(i, j);
                     Color color=new Color(pixel,true);
                     int red=color.getRed();
                     int green=color.getGreen();
                     int blue=color.getBlue();
-                    String tmpB=Functions.intToBinary(blue);
-                    String tmpG=Functions.intToBinary(green);
-                    String tmpR=Functions.intToBinary(red);
                     if(c==0){
                         String bBits=Functions.intToBinary(blue);
-                        bBits=Functions.insertBit(bBits, allBits.charAt(allBitsWalker++), 7);
+                        bBits=Functions.insertBit(bBits, allBits.get(allBitsWalker++), 7);
                         blue=Functions.binToInt(bBits);
                     }else if(c==1){
                         String gBits=Functions.intToBinary(green);
-                        gBits=Functions.insertBit(gBits, allBits.charAt(allBitsWalker++), 7);
+                        gBits=Functions.insertBit(gBits, allBits.get(allBitsWalker++), 7);
                         green=Functions.binToInt(gBits);
                     }else{
                         String rBits=Functions.intToBinary(red);
-                        rBits=Functions.insertBit(rBits, allBits.charAt(allBitsWalker++), 7);
+                        rBits=Functions.insertBit(rBits, allBits.get(allBitsWalker++), 7);
                         red=Functions.binToInt(rBits);
-                    }
-                    String tmpB2=Functions.intToBinary(blue);
-                    String tmpG2=Functions.intToBinary(green);
-                    String tmpR2=Functions.intToBinary(red);
-                    if(i==0 && j==0){
-                        System.out.println("AAA: R="+tmpR+"   "+"G="+tmpG+"   "+"B="+tmpB+"   ");
-                        System.out.println("BBB: R="+tmpR2+"   "+"G="+tmpG2+"   "+"B="+tmpB2+"   ");
                     }
                     
                     pixel=new Color(red,green,blue).getRGB();
                     //System.out.println(i+","+j);
                     ret.setRGB(i, j, pixel);
+                    this.frmEnc.getProgress().setValue(this.frmEnc.getProgress().getValue()+1);
+                    this.frmEnc.getProgress().repaint();
                     //System.out.println(c);
                 }
             }
         }
+        this.frmEnc.getProgress().setVisible(false);
+        this.frmEnc.getMsgLabel().setText(" ");
+        this.frmEnc.setLocked(false);
         return ret;
     }
     
@@ -120,11 +134,14 @@ public class LSB {
         int w=this.coverImg.getWidth();
         int h=this.coverImg.getHeight();
         int walkerHeader=0;
-        int walkerSecret=0;
+        long walkerSecret=0;
         
         String headerBits="";
-        String secretBits="";
+        List<Character> secretBits=new ArrayList();
         boolean headerRead=false;
+        this.frmDec.getMsgLabel().setText("Decrypting...");
+        this.frmDec.getProgress().setValue(0);
+        
         for(int c=0;c<this.channelPerPixel;c++){
             for(int j=0;j<h;j++){
                 for(int i=0;i<w;i++){
@@ -155,25 +172,30 @@ public class LSB {
                             
                             if(!myKey.equals(this.key)){
                                 JOptionPane.showMessageDialog(null,"Gambar Tidak Mengandung Enkripsi.   "+myKey);
+                                this.frmDec.setLocked(false);
                                 return null;
                             }
                             
                             String myPass=Functions.strFromBits(passBits);
                             if(!myPass.equals(this.pass)){
                                 JOptionPane.showMessageDialog(null,"Password Salah");
+                                this.frmDec.setLocked(false);
                                 return null;
                             }
                             
                             this.ext=Functions.strFromBits(extBits);
                             
                             this.walker=Long.parseLong(walkerBits, 2);
-                            System.out.println("D-ext : "+this.ext);
+                            //System.out.println("D-ext : "+this.ext);
                             headerRead=true;
+                            this.frmDec.getProgress().setMaximum((int)this.walker);
+                            this.frmDec.getProgress().setVisible(true);
                         }
                         if(walkerSecret==this.walker)break;
-                        System.out.println(walkerSecret+" - "+this.walker);
-                        secretBits+=bit;
+                        //System.out.println(walkerSecret+" - "+this.walker);
+                        secretBits.add(bit);
                         walkerSecret++;
+                        this.frmDec.getProgress().setValue(this.frmDec.getProgress().getValue()+1);
                     }else{
                         headerBits+=bit;
                         walkerHeader++;
@@ -182,20 +204,26 @@ public class LSB {
             }
         }
         ret=Functions.getSecret(secretBits, this.ext);
+        //ret=null;
+        this.frmDec.getProgress().setVisible(false);
+        this.frmDec.getMsgLabel().setText(" ");
+        this.frmDec.setLocked(false);
         return ret;
     }
     
-    private String getKeyBinary(){
-        String ret="";
+    private List<Character> getKeyBinary(){
+        List<Character> ret=new ArrayList();
         int keys[]={this.key.charAt(0),this.key.charAt(1),this.key.charAt(2),this.key.charAt(3)};
         for(int i=0;i<4;i++){
-            ret+=Functions.intToBinary(keys[i]);
+            String tmp=Functions.intToBinary(keys[i]);
+            for(int c=0;c<tmp.length();c++){
+                ret.add(tmp.charAt(c));
+            }
         }
-        System.out.println(ret);
         return ret;
     }
-    private String getPassBinary(){
-        String ret="";
+    private List<Character> getPassBinary(){
+        List<Character> ret=new ArrayList();
         int keys[]=new int[5];
         for(int i=0;i<5;i++){
             if(i>=this.pass.length()){
@@ -206,12 +234,15 @@ public class LSB {
         }
         
         for(int i=0;i<5;i++){
-            ret+=Functions.intToBinary(keys[i]);
+            String tmp=Functions.intToBinary(keys[i]);
+            for(int c=0;c<tmp.length();c++){
+                ret.add(tmp.charAt(c));
+            }
         }
         return ret;
     }
-    private String getExtBinary(){
-        String ret="";
+    private List<Character> getExtBinary(){
+        List<Character> ret=new ArrayList();
         int keys[]=new int[5];
         for(int i=0;i<5;i++){
             if(i>=this.ext.length()){
@@ -222,17 +253,33 @@ public class LSB {
         }
         
         for(int i=0;i<5;i++){
-            ret+=Functions.intToBinary(keys[i]);
+            String tmp=Functions.intToBinary(keys[i]);
+            for(int c=0;c<tmp.length();c++){
+                ret.add(tmp.charAt(c));
+            }
         }
         return ret;
     }
-    private String getWalkerBinary(){
-        String ret="";
+    private List<Character> getWalkerBinary(){
+        List<Character> ret=new ArrayList();
         String wBin=Long.toBinaryString(this.walker);
         for(int i=0;i<64-wBin.length();i++){
-            ret+="0";
+            ret.add('0');
         }
-        ret+=wBin;
+        for(int i=0;i<wBin.length();i++){
+            ret.add(wBin.charAt(i));
+        }
+        
+        return ret;
+    }
+    
+    private List<Character> join(List<Character>... list){
+        List<Character> ret=new ArrayList();
+        for(List<Character> l:list){
+            for(Character c:l){
+                ret.add(c);
+            }
+        }
         return ret;
     }
     
