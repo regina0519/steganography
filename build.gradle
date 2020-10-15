@@ -11,4 +11,7 @@ repositories {
 
 dependencies {
     testImplementation     'junit:junit:4.13'
+    // https://mvnrepository.com/artifact/net.sf.image4j/image4j
+    implementation group: 'net.sf.image4j', name: 'image4j', version: '0.7zensight1'
+
 }
