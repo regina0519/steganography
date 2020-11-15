@@ -171,7 +171,7 @@ public class LSB {
                             String myKey=Functions.strFromBits(keyBits);
                             
                             if(!myKey.equals(this.key)){
-                                JOptionPane.showMessageDialog(null,"Gambar Tidak Mengandung Enkripsi.   "+myKey);
+                                JOptionPane.showMessageDialog(null,"Gambar Tidak Mengandung Enkripsi.   ");
                                 this.frmDec.setLocked(false);
                                 return null;
                             }
