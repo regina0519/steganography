@@ -25,7 +25,7 @@ public class LSB {
     private String pass;
     private long walker;
     private String ext;
-    private final int headerWalker=32+40+64+40;
+    public static final int headerWalker=32+40+64+40;
     private int channelPerPixel;
     private FormEncrypt frmEnc;
     private FormDecrypt frmDec;
@@ -60,6 +60,8 @@ public class LSB {
     public void setProgress(long value){
         
     }
+    
+    
     
     public BufferedImage encrypt(){
         if(this.coverImg==null)return null;
@@ -171,14 +173,14 @@ public class LSB {
                             String myKey=Functions.strFromBits(keyBits);
                             
                             if(!myKey.equals(this.key)){
-                                JOptionPane.showMessageDialog(null,"Gambar Tidak Mengandung Enkripsi.   ");
+                                JOptionPane.showMessageDialog(null,"Image not encrypted");
                                 this.frmDec.setLocked(false);
                                 return null;
                             }
                             
                             String myPass=Functions.strFromBits(passBits);
                             if(!myPass.equals(this.pass)){
-                                JOptionPane.showMessageDialog(null,"Password Salah");
+                                JOptionPane.showMessageDialog(null,"Sorry, Wrong key");
                                 this.frmDec.setLocked(false);
                                 return null;
                             }

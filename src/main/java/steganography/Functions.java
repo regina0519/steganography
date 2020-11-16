@@ -20,6 +20,8 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -31,6 +33,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.filechooser.FileFilter;
+import net.sf.image4j.util.ConvertUtil;
 
 /**
  *
@@ -38,6 +41,7 @@ import javax.swing.filechooser.FileFilter;
  */
 public class Functions {
     public static int channel=3;
+    public static char PASSCHAR; 
     
     public static File browseImage(Component parent){
         File ret=null;
@@ -149,6 +153,23 @@ public class Functions {
             ret=tmp;
         }
         return ret;
+    }
+    
+    public static String getImageDimension(BufferedImage img){
+        if(img==null)return "";
+        return img.getWidth() + " x " + img.getHeight();
+    }
+    
+    public static String getImageDimension(File img){
+        if(img==null)return "";
+        BufferedImage tmp;
+        try {
+            tmp = ImageIO.read(img);
+            return getImageDimension(tmp);
+        } catch (IOException ex) {
+            Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
+            return "";
+        }
     }
     
     public static void displayImage(JLabel lbl, File img){
@@ -338,6 +359,41 @@ public class Functions {
         }
         ret.setSize(w, h);
         return ret;
+    }
+    
+    public static String sizeInMegaBytes(long sizeBytes) {
+        double ret=(double) sizeBytes/(1024*1024);
+        return new DecimalFormat("#.##").format(ret)+" MB ("+sizeBytes+" bytes)";
+    }
+    
+    public static String fileSizeInMegaBytes(File file) {
+        double ret=(double) file.length()/(1024*1024);
+        return new DecimalFormat("#.##").format(ret)+" MB ("+fileSizeInBytes(file)+")";
+    }
+ 
+    public static String fileSizeInKiloBytes(File file) {
+        double ret=(double) file.length()/1024;
+        return new DecimalFormat("#.##").format(ret)+"  kB ("+fileSizeInBytes(file)+")";
+    }
+ 
+    public static String fileSizeInBytes(File file) {
+        return file.length()+" bytes";
+    }
+    
+    public static int getMaxSecretSize(File coverImg){
+        BufferedImage tmp;
+        try {
+            tmp = Functions.deepCopy(ConvertUtil.convert24(ImageIO.read(coverImg)));
+            int w=tmp.getWidth();
+            int h=tmp.getHeight();
+            int totPixel=w*h;
+            int maxSize=Math.floorDiv(totPixel*Functions.channel-LSB.headerWalker, 8);
+            return maxSize;
+            
+        } catch (IOException ex) {
+            Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
+            return -1;
+        }
     }
     
 }
