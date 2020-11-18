@@ -21,7 +21,7 @@ import javax.swing.JProgressBar;
 public class LSB {
     private BufferedImage coverImg;
     private File secretImg;
-    private final String key="ABAL";
+    public static final String key="ABAL";
     private String pass;
     private long walker;
     private String ext;

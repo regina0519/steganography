@@ -6,6 +6,7 @@
 package steganography;
 
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -20,6 +21,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -42,6 +44,91 @@ import net.sf.image4j.util.ConvertUtil;
 public class Functions {
     public static int channel=3;
     public static char PASSCHAR; 
+    
+    public static File saveEncryptedImageAs(Component parent, File image){
+        if(image==null)return null;
+        if(!image.exists())return null;
+        File ret=null;
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                if (file.isDirectory()) {
+                    return true;
+                } else {
+                    return file.getName().toLowerCase().endsWith(".bmp"); // lets try it
+                }
+            }
+
+            @Override
+            public String getDescription() {
+                return "Bitmap (24-Bit)";
+            }
+        });
+        fileChooser.setSelectedFile(new File(image.getName()));
+        int option = fileChooser.showSaveDialog(parent);
+        if(option == JFileChooser.APPROVE_OPTION){
+           ret = fileChooser.getSelectedFile();
+           String ext=Functions.getFileExt(ret);
+           if(!ext.toUpperCase().equals("BMP")){
+               ret=new File(ret.getAbsolutePath()+".bmp");
+           }
+            try {
+                Files.copy(image.toPath(), ret.toPath(),StandardCopyOption.REPLACE_EXISTING);
+                //Desktop.getDesktop().open(ret);
+                JOptionPane.showMessageDialog(parent,"Image saved");
+            } catch (IOException ex) {
+                ret=null;
+            }
+        }
+        return ret;
+    }
+    
+    public static File saveSecretImageAs(Component parent, File image){
+        if(image==null)return null;
+        if(!image.exists())return null;
+        String realExt=Functions.getFileExt(image);
+        File ret=null;
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                if (file.isDirectory()) {
+                    return true;
+                } else {
+                    return file.getName().toLowerCase().endsWith(".png")
+                            || file.getName().toLowerCase().endsWith(".jpeg")
+                            || file.getName().toLowerCase().endsWith(".jpg")
+                            || file.getName().toLowerCase().endsWith(".bmp")
+                            || file.getName().toLowerCase().endsWith(".gif"); // lets try it
+                }
+            }
+
+            @Override
+            public String getDescription() {
+                return "All image Support!";
+            }
+        });
+        fileChooser.setSelectedFile(new File(image.getName()));
+        int option = fileChooser.showSaveDialog(parent);
+        if(option == JFileChooser.APPROVE_OPTION){
+           ret = fileChooser.getSelectedFile();
+           String ext=Functions.getFileExt(ret);
+           if(!ext.toUpperCase().equals(realExt.toUpperCase())){
+               ret=new File(ret.getAbsolutePath()+"."+realExt);
+           }
+            try {
+                Files.copy(image.toPath(), ret.toPath(),StandardCopyOption.REPLACE_EXISTING);
+                //Desktop.getDesktop().open(ret);
+                JOptionPane.showMessageDialog(parent,"Extracted Image saved");
+            } catch (IOException ex) {
+                ret=null;
+            }
+        }
+        return ret;
+    }
     
     public static File browseImage(Component parent){
         File ret=null;
@@ -71,7 +158,7 @@ public class Functions {
         if (res== JFileChooser.APPROVE_OPTION){
             ret = chooser.getSelectedFile();
         } else {
-            JOptionPane.showMessageDialog(parent,"Cancelled by user!");
+            //JOptionPane.showMessageDialog(parent,"Cancelled by user!");
         }           
         
         return ret;
@@ -101,7 +188,7 @@ public class Functions {
         if (res== JFileChooser.APPROVE_OPTION){
             ret = chooser.getSelectedFile();
         } else {
-            JOptionPane.showMessageDialog(parent,"Cancelled by user!");
+            //JOptionPane.showMessageDialog(parent,"Cancelled by user!");
         }           
         
         return ret;
@@ -183,7 +270,7 @@ public class Functions {
             Image i=tmp.getScaledInstance(d.width, d.height, Image.SCALE_SMOOTH);
             lbl.setIcon(new ImageIcon(i));
         } catch (IOException ex) {
-            Logger.getLogger(FormEncrypt.class.getName()).log(Level.SEVERE, null, ex);
+            //Logger.getLogger(FormEncrypt.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -395,5 +482,6 @@ public class Functions {
             return -1;
         }
     }
+    
     
 }
