@@ -284,7 +284,7 @@ public class Functions {
         
     }
     
-    public static List<Character> fileBits(File file, JProgressBar progress){
+    public static char[] fileBits(File file, JProgressBar progress){
         progress.setVisible(true);
         
         try {
@@ -300,13 +300,18 @@ public class Functions {
                 progress.setValue(progress.getValue()+1);
             }
             progress.setVisible(false);
-            return bits;
+            char[] r=new char[bits.size()];
+            int i=0;
+            for(Character c:bits){
+                r[i++]=c;
+            }
+            return r;
             //Functions.tesBuild(bits);
         } catch (IOException ex) {
             Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
         }
         progress.setVisible(false);
-        return new ArrayList();
+        return null;
     }
     
     public static File getSecret(String bits, String ext){

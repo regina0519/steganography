@@ -7,6 +7,7 @@ package steganography;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -72,7 +73,7 @@ public class EncryptedImage extends JPanel {
         FileTime creationTime;
         try {
             creationTime = (FileTime) Files.getAttribute(Paths.get(this.file.getAbsolutePath()), "creationTime");
-            this.fileDate=new JLabel(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(creationTime.toMillis())));
+            this.fileDate=new JLabel(new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").format(new Date(creationTime.toMillis())));
         } catch (IOException ex) {
             this.fileDate=new JLabel();
         }
@@ -91,6 +92,8 @@ public class EncryptedImage extends JPanel {
         JPanel right=new JPanel();
         right.setLayout(new SpringLayout());
         this.img.setSize(100, 100);
+        left.setPreferredSize(new Dimension(100,100));
+        right.setPreferredSize(new Dimension(300,100));
         Functions.displayImage(this.img, this.file);
         left.add(this.img,BorderLayout.CENTER);
         
@@ -133,6 +136,7 @@ public class EncryptedImage extends JPanel {
         right.setBackground(new Color(10,10,10,255));
         content.setBackground(new Color(10,10,10,255));
         this.setBackground(new Color(2,2,2,100));
+        
         
         this.img.addMouseListener(new MouseAdapter(){
             public void mouseReleased(MouseEvent me) {

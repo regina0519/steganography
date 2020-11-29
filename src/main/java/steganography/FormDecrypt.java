@@ -581,7 +581,9 @@ public class FormDecrypt extends javax.swing.JFrame {
                     FormDecrypt.this.jLabel10.setText(Functions.getFileExt(result).toUpperCase());
                     Functions.displayImage(FormDecrypt.this.jLabel4, result);
                     FormDecrypt.this.extractedImage=result;
+                    
                     JOptionPane.showMessageDialog(FormDecrypt.this,"Done");
+                    
                 } catch (IOException ex) {
                     Logger.getLogger(FormDecrypt.class.getName()).log(Level.SEVERE, null, ex);
                 }

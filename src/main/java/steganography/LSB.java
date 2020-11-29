@@ -81,20 +81,20 @@ public class LSB {
         }
         this.walker=this.secretImg.length()*8;
         this.frmEnc.getMsgLabel().setText("Reading secret image...");
-        List<Character> allBits=this.join(this.getKeyBinary(),this.getPassBinary(),this.getWalkerBinary(),this.getExtBinary(),Functions.fileBits(this.secretImg,this.frmEnc.getProgress()));
+        char[] allBits=this.join(this.getKeyBinary(),this.getPassBinary(),this.getWalkerBinary(),this.getExtBinary(),Functions.fileBits(this.secretImg,this.frmEnc.getProgress()));
         //String allBits=this.getKeyBinary()+this.getPassBinary()+this.getWalkerBinary()+this.getExtBinary()+Functions.fileBits(this.secretImg,this.frmEnc.getProgress());
         
         System.out.println("E-walker: "+this.getWalkerBinary()+"    "+this.walker);
         int allBitsWalker=0;
         
-        this.frmEnc.getProgress().setMaximum(allBits.size());
+        this.frmEnc.getProgress().setMaximum(allBits.length);
         this.frmEnc.getProgress().setValue(0);
         this.frmEnc.getProgress().setVisible(true);
         this.frmEnc.getMsgLabel().setText("Encrypting...");
         for(int c=0;c<this.channelPerPixel;c++){
             for(int j=0;j<h;j++){
                 for(int i=0;i<w;i++){
-                    if(allBitsWalker==allBits.size())break;
+                    if(allBitsWalker==allBits.length)break;
                     int pixel=ret.getRGB(i, j);
                     Color color=new Color(pixel,true);
                     int red=color.getRed();
@@ -102,15 +102,15 @@ public class LSB {
                     int blue=color.getBlue();
                     if(c==0){
                         String bBits=Functions.intToBinary(blue);
-                        bBits=Functions.insertBit(bBits, allBits.get(allBitsWalker++), 7);
+                        bBits=Functions.insertBit(bBits, allBits[allBitsWalker++], 7);
                         blue=Functions.binToInt(bBits);
                     }else if(c==1){
                         String gBits=Functions.intToBinary(green);
-                        gBits=Functions.insertBit(gBits, allBits.get(allBitsWalker++), 7);
+                        gBits=Functions.insertBit(gBits, allBits[allBitsWalker++], 7);
                         green=Functions.binToInt(gBits);
                     }else{
                         String rBits=Functions.intToBinary(red);
-                        rBits=Functions.insertBit(rBits, allBits.get(allBitsWalker++), 7);
+                        rBits=Functions.insertBit(rBits, allBits[allBitsWalker++], 7);
                         red=Functions.binToInt(rBits);
                     }
                     
@@ -210,10 +210,11 @@ public class LSB {
         this.frmDec.getProgress().setVisible(false);
         this.frmDec.getMsgLabel().setText(" ");
         this.frmDec.setLocked(false);
+        this.frmDec.repaint();
         return ret;
     }
     
-    private List<Character> getKeyBinary(){
+    private char[] getKeyBinary(){
         List<Character> ret=new ArrayList();
         int keys[]={this.key.charAt(0),this.key.charAt(1),this.key.charAt(2),this.key.charAt(3)};
         for(int i=0;i<4;i++){
@@ -222,9 +223,14 @@ public class LSB {
                 ret.add(tmp.charAt(c));
             }
         }
-        return ret;
+        char[] r=new char[ret.size()];
+        int i=0;
+        for(Character c:ret){
+            r[i++]=c;
+        }
+        return r;
     }
-    private List<Character> getPassBinary(){
+    private char[] getPassBinary(){
         List<Character> ret=new ArrayList();
         int keys[]=new int[5];
         for(int i=0;i<5;i++){
@@ -241,9 +247,14 @@ public class LSB {
                 ret.add(tmp.charAt(c));
             }
         }
-        return ret;
+        char[] r=new char[ret.size()];
+        int i=0;
+        for(Character c:ret){
+            r[i++]=c;
+        }
+        return r;
     }
-    private List<Character> getExtBinary(){
+    private char[] getExtBinary(){
         List<Character> ret=new ArrayList();
         int keys[]=new int[5];
         for(int i=0;i<5;i++){
@@ -260,9 +271,14 @@ public class LSB {
                 ret.add(tmp.charAt(c));
             }
         }
-        return ret;
+        char[] r=new char[ret.size()];
+        int i=0;
+        for(Character c:ret){
+            r[i++]=c;
+        }
+        return r;
     }
-    private List<Character> getWalkerBinary(){
+    private char[] getWalkerBinary(){
         List<Character> ret=new ArrayList();
         String wBin=Long.toBinaryString(this.walker);
         for(int i=0;i<64-wBin.length();i++){
@@ -272,14 +288,28 @@ public class LSB {
             ret.add(wBin.charAt(i));
         }
         
-        return ret;
+        char[] r=new char[ret.size()];
+        int i=0;
+        for(Character c:ret){
+            r[i++]=c;
+        }
+        return r;
     }
     
-    private List<Character> join(List<Character>... list){
-        List<Character> ret=new ArrayList();
-        for(List<Character> l:list){
-            for(Character c:l){
-                ret.add(c);
+    private char[] join(char[]... list){
+        long size=0;
+        for(char[] l:list){
+            size+=l.length;
+        }
+        if(size>Integer.MAX_VALUE){
+            JOptionPane.showMessageDialog(null,"Image size exceeded limitation");
+            return null;
+        }
+        char[] ret=new char[(int)size];
+        int i=0;
+        for(char[] l:list){
+            for(char c:l){
+                ret[i++]=c;
             }
         }
         return ret;

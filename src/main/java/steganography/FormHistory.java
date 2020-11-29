@@ -15,7 +15,14 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -70,20 +77,46 @@ public class FormHistory extends javax.swing.JFrame {
     
     private void displayHistory(){
         this.jPanel4.setLayout(new GridLayout(0,2));
+        File[] files;
+        String resDir=System.getProperty("user.dir")+"/steganography/encrypted";
+        File f = new File(resDir);
+        files = f.listFiles();
+        if(files==null)return;
+        Arrays.sort(files, Comparator.comparingLong(File::lastModified).reversed());
+        //ExecutorService service = Executors.newFixedThreadPool(1);
+        for (File file : files) {
+            if(Functions.getFileExt(file).toUpperCase().equals("BMP")){
+                FormHistory.this.jPanel4.add(EncryptedImage.create(file.getAbsolutePath()));
+                FormHistory.this.pack();
+            }
+
+        }
+        /*service.shutdown();
+        try {
+            service.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(FormHistory.class.getName()).log(Level.SEVERE, null, ex);
+        }*/
+        
+        
+        
+        /*this.jPanel4.setLayout(new GridLayout(0,2));
         String[] files;
         String resDir=System.getProperty("user.dir")+"/steganography/encrypted";
         File f = new File(resDir);
         files = f.list();
         if(files==null)return;
+        List<EncryptedImage> ei=new ArrayList();
         for (String fileName : files) {
             String fn=resDir+"/"+fileName;
             File file=new File(fn);
             if(Functions.getFileExt(file).toUpperCase().equals("BMP")){
-                FormHistory.this.jPanel4.add(EncryptedImage.create(fn));
+                //FormHistory.this.jPanel4.add(EncryptedImage.create(fn));
+                ei.add(EncryptedImage.create(fn));
             }
 
         }
-        
+        */
         
     }
 
@@ -99,6 +132,7 @@ public class FormHistory extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jPanel4 = new javax.swing.JPanel();
@@ -126,7 +160,7 @@ public class FormHistory extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1)
-                .addContainerGap(619, Short.MAX_VALUE))
+                .addContainerGap(738, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -138,15 +172,22 @@ public class FormHistory extends javax.swing.JFrame {
 
         jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
+        jLabel2.setText("Loading, Please wait ...");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel2)
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 23, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addGap(0, 7, Short.MAX_VALUE)
+                .addComponent(jLabel2))
         );
 
         jPanel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
@@ -206,7 +247,13 @@ public class FormHistory extends javax.swing.JFrame {
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
         // TODO add your handling code here:
-        this.displayHistory();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                FormHistory.this.displayHistory();
+                FormHistory.this.jLabel2.setVisible(false);
+            }
+        }).start();
     }//GEN-LAST:event_formWindowOpened
 
     /**
@@ -246,6 +293,7 @@ public class FormHistory extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
