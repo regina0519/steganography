@@ -9,6 +9,11 @@ repositories {
     jcenter()
 }
 
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
 dependencies {
     testImplementation     'junit:junit:4.13'
     // https://mvnrepository.com/artifact/net.sf.image4j/image4j

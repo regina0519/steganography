@@ -794,7 +794,8 @@ public class FormEncrypt extends javax.swing.JFrame {
                     Functions.displayImage(FormEncrypt.this.jLabel5, encrypted);
 
 
-                    String resDir=System.getProperty("user.dir")+"/steganography/encrypted/";
+                    String resDir=System.getProperty("user.dir")+"/encrypted/";
+                    
                     //String res=resDir+"encrypted"+new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())+".bmp";
                     String res=resDir+FormEncrypt.this.coverImg.getName()+".bmp";
                     if(!Files.exists(Paths.get(resDir))){

@@ -333,7 +333,7 @@ public class Functions {
         for(int i=0;i<bytes.size();i++){
             realBytes[i]=Functions.binToByte(bytes.get(i));
         }
-        String resDir=System.getProperty("user.dir")+"/steganography/";
+        String resDir=System.getProperty("user.dir")+"/decrypted/";
         String res=resDir+"result."+ext;
         System.out.println(res);
         if(!Files.exists(Paths.get(resDir))){
@@ -377,7 +377,7 @@ public class Functions {
         for(int i=0;i<bytes.size();i++){
             realBytes[i]=Functions.binToByte(bytes.get(i));
         }
-        String resDir=System.getProperty("user.dir")+"/steganography/";
+        String resDir=System.getProperty("user.dir")+"/decrypted/";
         String res=resDir+"result."+ext;
         System.out.println(res);
         if(!Files.exists(Paths.get(resDir))){
@@ -436,7 +436,8 @@ public class Functions {
         }
         for(int bb=0;bb<kInt.length;bb++){
             kInt[bb]=Functions.binToInt(lKey.get(bb));
-            ret+=Character.toString(kInt[bb]);
+            //ret+=Character.toString(kInt[bb]);
+            ret+=(char)kInt[bb];
         }
         return ret;
     } 

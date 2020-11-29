@@ -78,7 +78,7 @@ public class FormHistory extends javax.swing.JFrame {
     private void displayHistory(){
         this.jPanel4.setLayout(new GridLayout(0,2));
         File[] files;
-        String resDir=System.getProperty("user.dir")+"/steganography/encrypted";
+        String resDir=System.getProperty("user.dir")+"/encrypted";
         File f = new File(resDir);
         files = f.listFiles();
         if(files==null)return;
